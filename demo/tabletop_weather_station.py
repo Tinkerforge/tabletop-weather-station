@@ -30,7 +30,8 @@ from tinkerforge.bricklet_lcd_128x64 import BrickletLCD128x64
 from tinkerforge.bricklet_air_quality import BrickletAirQuality, GetAllValues
 from tinkerforge.bricklet_outdoor_weather import BrickletOutdoorWeather, GetStationData, GetSensorData
 
-from screens import screen_set_lcd, screen_tab_selected, screen_touch_gesture, screen_update, screen_slider_value, Screen
+from screens import screen_set_lcd, screen_tab_selected, screen_touch_gesture, screen_update, screen_slider_value, Screen, TIME_SECONDS
+from value_db import ValueDB
 
 import logging as log
 log.basicConfig(level=log.INFO)
@@ -42,21 +43,42 @@ class TabletopWeatherStation:
     HOST = "localhost"
     PORT = 4223
 
+    vdb = None
     ipcon = None
     lcd128x64 = None
     air_quality = None
     outdoor_weather = None
 
     outdoor_weather_station_last_value = {}
-    outdoor_weather_station_values = {}
-
     outdoor_weather_sensor_last_value = {}
-    outdoor_weather_sensor_values = {}
-        
     air_quality_last_value = None
-    air_quality_values = []
 
-    def __init__(self):
+    graph_resolution_index = None
+    logging_period_index = None
+
+    def update_graph_resolution(self):
+        index = self.vdb.get_setting('graph_resolution')
+        if index == None:
+            index = 0
+            self.vdb.set_setting('graph_resolution', '0')
+        self.graph_resolution_index = int(index)
+
+    def update_logging_period(self):
+        index = self.vdb.get_setting('logging_period')
+        if index == None:
+            index = 0
+            self.vdb.set_setting('logging_period', '0')
+        self.logging_period_index = int(index)
+
+    def __init__(self, vdb):
+        self.vdb = vdb
+        self.update_graph_resolution()
+        self.update_logging_period()
+
+        self.last_air_quality_time = 0
+        self.last_station_time = 0
+        self.last_sensor_time = 0
+
         self.ipcon = IPConnection()
         while True:
             try:
@@ -123,7 +145,7 @@ class TabletopWeatherStation:
                     self.cb_air_quality_all_values(*self.air_quality.get_all_values())
 
                     self.air_quality.register_callback(self.air_quality.CALLBACK_ALL_VALUES, self.cb_air_quality_all_values)
-                    self.air_quality.set_all_values_callback_configuration(1000, True)
+                    self.air_quality.set_all_values_callback_configuration(1000, False)
 
                     log.info('Air Quality Bricklet initialized')
                 except Error as e:
@@ -166,29 +188,38 @@ class TabletopWeatherStation:
 
     def cb_outdoor_weather_station_data(self, identifier, temperature, humidity, wind_speed, gust_speed, rain, wind_direction, battery_low, last_change = 0):
         self.outdoor_weather_station_last_value[identifier] = GetStationData(temperature, humidity, wind_speed, gust_speed, rain, wind_direction, battery_low, last_change)
-        try:
-            self.outdoor_weather_station_values[identifier].append(self.outdoor_weather_station_last_value[identifier])
-        except:
-            self.outdoor_weather_station_values[identifier] = [self.outdoor_weather_station_last_value[identifier]]
+
+        now = time.time()
+        if now - self.last_station_time >= TIME_SECONDS[self.logging_period_index]:
+            self.vdb.add_data_station(identifier, temperature, humidity, wind_speed, gust_speed, rain, wind_direction, battery_low)
+            self.last_station_time = now
 
     def cb_outdoor_weather_sensor_data(self, identifier, temperature, humidity, last_change = 0):
         self.outdoor_weather_sensor_last_value[identifier] = GetSensorData(temperature, humidity, 0)
-        try:
-            self.outdoor_weather_sensor_values[identifier].append(self.outdoor_weather_sensor_last_value[identifier])
-        except:
-            self.outdoor_weather_sensor_values[identifier] = [self.outdoor_weather_sensor_last_value[identifier]]
+
+        now = time.time()
+        if now - self.last_sensor_time >= TIME_SECONDS[self.logging_period_index]:
+            self.vdb.add_data_sensor(identifier, temperature, humidity)
+            self.last_sensor_time = now
 
     def cb_air_quality_all_values(self, iaq_index, iaq_index_accuracy, temperature, humidity, air_pressure):
         self.air_quality_last_value = GetAllValues(iaq_index, iaq_index_accuracy, temperature, humidity, air_pressure)
-        self.air_quality_values.append((time.time(), self.air_quality_last_value))
+
+        now = time.time()
+        if now - self.last_air_quality_time >= TIME_SECONDS[self.logging_period_index]:
+            self.vdb.add_data_air_quality(iaq_index, iaq_index_accuracy, temperature, humidity, air_pressure)
+            self.last_air_quality_time = now
 
     def tick(self):
         return
 
 if __name__ == "__main__":
     log.info('Tabletop Weather Station: Start')
-    tws = TabletopWeatherStation()
+
+    vdb = ValueDB()
+    tws = TabletopWeatherStation(vdb)
     Screen.tws = tws
+    Screen.vdb = vdb
 
     try:
         while True:
@@ -199,5 +230,5 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         if tws.ipcon != None:
             tws.ipcon.disconnect()
-
+        vdb.run = False
         log.info('Tabletop Weather Station: End')
