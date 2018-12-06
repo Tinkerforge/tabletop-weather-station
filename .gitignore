@@ -1,0 +1,4 @@
+*.pyc
+*.swp
+demo/tinkerforge
+demo/tabletop_weather_station.db
