@@ -36,7 +36,8 @@ class ValueDB:
     air_quality_first_data = None
 
     def loop(self):
-        self.db = sqlite3.connect('tabletop_weather_station.db')
+        cur_path = os.path.dirname(os.path.abspath(__file__))
+        self.db = sqlite3.connect(os.path.join(cur_path, 'tabletop_weather_station.db'))
         self.dbc = self.db.cursor()
         self.create()
         
