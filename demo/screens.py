@@ -526,8 +526,8 @@ def screen_update_tabs():
         elif screen.__class__ == SensorScreen:
             sensor_screen = screen
     
-    station_keys = Screen.tws.outdoor_weather_station_last_value.keys()
-    sensor_keys  = Screen.tws.outdoor_weather_sensor_last_value.keys()
+    station_keys = list(Screen.tws.outdoor_weather_station_last_value.keys())
+    sensor_keys  = list(Screen.tws.outdoor_weather_sensor_last_value.keys())
     if ((len(station_keys) > 0) and (station_screen == None)) or \
        ((len(sensor_keys)  > 0) and (sensor_screen == None)) or \
        (station_keys != station_screen.keys) or \
