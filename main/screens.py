@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Tabletop Weather Station Demo
+Tabletop Weather Station
 Copyright (C) 2018 Olaf Lüke <olaf@tinkerforge.com>
 
 screens.py: Weather Station screens (implemented as tabs)

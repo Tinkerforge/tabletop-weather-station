@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 
 """
-Tabletop Weather Station Demo
+Tabletop Weather Station
 Copyright (C) 2018 Olaf Lüke <olaf@tinkerforge.com>
 
-tabletop_weather_station.py: Demo implementation for Tinkerforge
+tabletop_weather_station.py: Main implementation for Tinkerforge
                              Tabletop Weather Station
 
 This program is free software; you can redistribute it and/or
