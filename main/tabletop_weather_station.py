@@ -60,14 +60,14 @@ class TabletopWeatherStation:
         index = self.vdb.get_setting('graph_resolution')
         if index == None:
             index = 0
-            self.vdb.set_setting('graph_resolution', '0')
+            self.vdb.set_setting('graph_resolution', '1')
         self.graph_resolution_index = int(index)
 
     def update_logging_period(self):
         index = self.vdb.get_setting('logging_period')
         if index == None:
             index = 0
-            self.vdb.set_setting('logging_period', '0')
+            self.vdb.set_setting('logging_period', '1')
         self.logging_period_index = int(index)
 
     def __init__(self, vdb):
