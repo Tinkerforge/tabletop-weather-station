@@ -506,6 +506,10 @@ def screen_init(initial_init = True, stations = [], sensors = []):
         screens.append(SensorScreen(sensors))
     screens.append(SettingsScreen())
 
+    import custom_screens
+    custom_pos = custom_screens.CUSTOM_SCREENS_POSITION
+    screens[custom_pos:custom_pos] = custom_screens.CUSTOM_SCREENS
+
     for index, screen in enumerate(screens):
         if screen.icon != None:
             Screen.lcd.set_gui_tab_icon(index, screen.icon.data)
