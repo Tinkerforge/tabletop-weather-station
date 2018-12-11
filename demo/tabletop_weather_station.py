@@ -38,6 +38,7 @@ log.basicConfig(level=log.INFO)
 
 import sys
 import time
+from threading import Lock
 
 class TabletopWeatherStation:
     HOST = "localhost"
@@ -55,6 +56,7 @@ class TabletopWeatherStation:
 
     graph_resolution_index = None
     logging_period_index = None
+
 
     def update_graph_resolution(self):
         index = self.vdb.get_setting('graph_resolution')
@@ -74,6 +76,11 @@ class TabletopWeatherStation:
         self.vdb = vdb
         self.update_graph_resolution()
         self.update_logging_period()
+
+        # We use this lock to make sure that there is never an update at the
+        # same time as a gesture or GUI callback. Otherwise we might draw two
+        # different GUI elements at the same time.
+        self.update_lock = Lock()
 
         self.last_air_quality_time = 0
         self.last_station_time = 0
@@ -107,13 +114,19 @@ class TabletopWeatherStation:
             return
 
     def cb_touch_gesture(self, gesture, duration, pressure_max, x_start, x_end, y_start, y_end, age):
+        self.update_lock.acquire()
         screen_touch_gesture(gesture, duration, pressure_max, x_start, x_end, y_start, y_end, age)
+        self.update_lock.release()
     
     def cb_gui_tab_selected(self, index):
+        self.update_lock.acquire()
         screen_tab_selected(index)
+        self.update_lock.release()
     
     def cb_gui_slider_value(self, index, value):
+        self.update_lock.acquire()
         screen_slider_value(index, value)
+        self.update_lock.release()
 
     def cb_enumerate(self, uid, connected_uid, position, hardware_version,
                      firmware_version, device_identifier, enumeration_type):
@@ -122,6 +135,7 @@ class TabletopWeatherStation:
             if device_identifier == BrickletLCD128x64.DEVICE_IDENTIFIER:
                 try:
                     self.lcd128x64 = BrickletLCD128x64(uid, self.ipcon)
+                    self.lcd128x64.set_response_expected_all(True)
                     
                     # Register touch gesture callback to function cb_touch_gesture
                     self.lcd128x64.register_callback(self.lcd128x64.CALLBACK_TOUCH_GESTURE, self.cb_touch_gesture)
@@ -210,9 +224,6 @@ class TabletopWeatherStation:
             self.vdb.add_data_air_quality(iaq_index, iaq_index_accuracy, temperature, humidity, air_pressure)
             self.last_air_quality_time = now
 
-    def tick(self):
-        return
-
 if __name__ == "__main__":
     log.info('Tabletop Weather Station: Start')
 
@@ -223,8 +234,9 @@ if __name__ == "__main__":
 
     try:
         while True:
-            tws.tick()
+            tws.update_lock.acquire()
             screen_update()
+            tws.update_lock.release()
             time.sleep(1)
             
     except KeyboardInterrupt:
