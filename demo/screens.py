@@ -205,8 +205,8 @@ class GraphScreen(Screen):
 
         scaled_data, value_min, value_max = self.scale_data_for_graph(data)
 
-        value_min = fmt.format(value_min/divisor)
-        value_max = fmt.format(value_max/divisor)
+        value_min = fmt.format(float(value_min)/divisor)
+        value_max = fmt.format(float(value_max)/divisor)
         value_min = ' '*(6 - len(value_min)) + value_min
         value_max = ' '*(6 - len(value_max)) + value_max
         self.lcd.draw_text(2, 0,  self.lcd.FONT_6X8, self.lcd.COLOR_BLACK, value_max)
