@@ -534,8 +534,8 @@ def screen_update_tabs():
     sensor_keys  = list(Screen.tws.outdoor_weather_sensor_last_value.keys())
     if ((len(station_keys) > 0) and (station_screen == None)) or \
        ((len(sensor_keys)  > 0) and (sensor_screen == None)) or \
-       (station_keys != station_screen.keys) or \
-       (sensor_keys  != sensor_screen.keys):
+       ((station_screen != None) and (station_keys != station_screen.keys)) or \
+       ((station_screen != None) and (sensor_keys  != sensor_screen.keys)):
        screen_init(False, station_keys, sensor_keys)
 
 def screen_slider_value(index, value):
