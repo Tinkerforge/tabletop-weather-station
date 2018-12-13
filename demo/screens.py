@@ -54,14 +54,17 @@ class Screen:
         Screen.lcd.write_pixels(x, y, x + icon.WIDTH-1, y + icon.HEIGHT-1, icon.data)
     
     def scale_data_for_graph(self, data):
+        if not data:
+            return [0], 0, 0
+
         ret = []
         value_min = min(data)
         value_max = max(data)
         if value_max-value_min == 0:
-            return [0]*len(data), 0, 0
+            return [127]*len(data), value_min, value_max
         
         for d in data:
-            ret.append((d-value_min)*255/(value_max-value_min))
+            ret.append(int((d-value_min)*255/(value_max-value_min)))
         return ret, value_min, value_max
 
 class IndoorScreen(Screen):
