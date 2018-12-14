@@ -80,23 +80,23 @@ class ValueDB:
             count_str = '1'
             limit = num*time_resolution
         elif time_resolution < 60*60:
-            limit = num*(time_resolution/60)
+            limit = num*(time_resolution//60)
             table += '_minute'
         elif time_resolution < 60*60*24:
-            limit = num*(time_resolution/(60*60))
+            limit = num*(time_resolution//(60*60))
             table += '_hour'
         else:
-            limit = num*(time_resolution/(60*60*24))
+            limit = num*(time_resolution//(60*60*24))
             table += '_day'
 
         if identifier == None:
-            self.dbc.execute('SELECT {0}, {1} FROM {2} ORDER BY time DESC LIMIT ?'.format(field, count_str, table), (limit,))
+            self.dbc.execute('SELECT {0}, {1} FROM {2} ORDER BY id DESC LIMIT ?'.format(field, count_str, table), (limit,))
         else:
-            self.dbc.execute('SELECT {0}, {1} FROM {2} WHERE identifier = ? ORDER BY time DESC LIMIT ?'.format(field, count_str, table), (identifier, limit))
+            self.dbc.execute('SELECT {0}, {1} FROM {2} WHERE identifier = ? ORDER BY id DESC LIMIT ?'.format(field, count_str, table), (identifier, limit))
 
         values = self.dbc.fetchall()
 
-        data_per_num = limit/num
+        data_per_num = limit//num
         averaged_values = []
 
         try:
@@ -119,6 +119,8 @@ class ValueDB:
                     averaged_values.append(v)
                 else:
                     averaged_values.append(v/j)
+            else:
+                averaged_values.append(0)
 
         ret = [averaged_values[-1]]*(num-len(averaged_values))
         for value in reversed(averaged_values):
@@ -149,7 +151,7 @@ class ValueDB:
             return self.func_queue_ret.get()
 
         try:
-            self.dbc.execute('SELECT rain FROM station WHERE identifier = ? ORDER BY time DESC LIMIT 1', (identifier, ))
+            self.dbc.execute('SELECT rain FROM station WHERE identifier = ? ORDER BY id DESC LIMIT 1', (identifier, ))
             period_end_rain = self.dbc.fetchone()[0]
 
             t = time.time() - rain_period
