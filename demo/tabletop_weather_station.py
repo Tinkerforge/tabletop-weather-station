@@ -235,7 +235,11 @@ if __name__ == "__main__":
     try:
         while True:
             tws.update_lock.acquire()
-            screen_update()
+            try:
+                screen_update()
+            except:
+                import traceback
+                traceback.print_exc()
             tws.update_lock.release()
             time.sleep(1)
             
