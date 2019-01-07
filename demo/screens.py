@@ -356,8 +356,13 @@ class StationScreen(Screen):
         humidity    = ' '*(2 - len(humidity)) + humidity
         wind_speed  = '{0:.1f}'.format(last_value.wind_speed/10.0)
         wind_speed  = ' '*(4 - len(wind_speed)) + wind_speed
-        period_rain = '{0:.1f}'.format(period_rain/10.0)
-        period_rain = ' '*(4 - len(period_rain)) + period_rain
+
+        if period_rain == None:
+            period_rain = '  ? '
+        else:
+            period_rain = '{0:.1f}'.format(period_rain/10.0)
+            period_rain = ' '*(4 - len(period_rain)) + period_rain
+
         direction   = last_value.wind_direction
         battery_low = last_value.battery_low
         station     = '{0}/{1}'.format(self.num + 1, len(self.keys))
