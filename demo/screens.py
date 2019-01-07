@@ -384,7 +384,7 @@ class StationScreen(Screen):
 #            self.lcd.draw_text(104, 33, self.lcd.FONT_6X8, self.lcd.COLOR_BLACK, d)
             self.lcd.draw_line(113, 15, 113 + xdiff, 15 + ydiff, True)
         except:
-            pass
+            self.lcd.draw_text(111, 12, self.lcd.FONT_6X8, self.lcd.COLOR_BLACK, '?')
 
         if direction < 8:
             self.draw_icon(50, 4, icons.IconFlagEast)
