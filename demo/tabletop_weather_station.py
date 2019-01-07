@@ -108,7 +108,7 @@ class TabletopWeatherStation:
             except Error as e:
                 log.error('Enumerate Error: ' + str(e.description))
                 time.sleep(1)
-    
+
     def update(self):
         if self.lcd128x64 == None:
             return
@@ -117,12 +117,12 @@ class TabletopWeatherStation:
         self.update_lock.acquire()
         screen_touch_gesture(gesture, duration, pressure_max, x_start, x_end, y_start, y_end, age)
         self.update_lock.release()
-    
+
     def cb_gui_tab_selected(self, index):
         self.update_lock.acquire()
         screen_tab_selected(index)
         self.update_lock.release()
-    
+
     def cb_gui_slider_value(self, index, value):
         self.update_lock.acquire()
         screen_slider_value(index, value)
@@ -136,7 +136,7 @@ class TabletopWeatherStation:
                 try:
                     self.lcd128x64 = BrickletLCD128x64(uid, self.ipcon)
                     self.lcd128x64.set_response_expected_all(True)
-                    
+
                     # Register touch gesture callback to function cb_touch_gesture
                     self.lcd128x64.register_callback(self.lcd128x64.CALLBACK_TOUCH_GESTURE, self.cb_touch_gesture)
                     self.lcd128x64.register_callback(self.lcd128x64.CALLBACK_GUI_TAB_SELECTED, self.cb_gui_tab_selected)
@@ -242,7 +242,7 @@ if __name__ == "__main__":
                 traceback.print_exc()
             tws.update_lock.release()
             time.sleep(1)
-            
+
     except KeyboardInterrupt:
         if tws.ipcon != None:
             tws.ipcon.disconnect()

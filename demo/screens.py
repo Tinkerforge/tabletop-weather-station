@@ -49,10 +49,10 @@ class Screen:
 
     def slider_value(self, index, value):
         pass
-    
+
     def draw_icon(self, x, y, icon):
         Screen.lcd.write_pixels(x, y, x + icon.WIDTH-1, y + icon.HEIGHT-1, icon.data)
-    
+
     def scale_data_for_graph(self, data):
         if not data:
             return [0], 0, 0
@@ -62,7 +62,7 @@ class Screen:
         value_max = max(data)
         if value_max-value_min == 0:
             return [127]*len(data), value_min, value_max
-        
+
         for d in data:
             ret.append(int((d-value_min)*255/(value_max-value_min)))
         return ret, value_min, value_max
@@ -85,7 +85,7 @@ class IndoorScreen(Screen):
         self.lcd.draw_line(0, 26, 127, 26, self.lcd.COLOR_BLACK)
         self.lcd.draw_line(60, 0, 60, 52, self.lcd.COLOR_BLACK)
         self.draw_update()
-    
+
     def draw_update(self):
         if self.tws.air_quality_last_value == None:
             return
@@ -115,7 +115,7 @@ class IndoorScreen(Screen):
             self.draw_icon(105, 29, icons.IconThumbsDown)
         else:
             self.draw_icon(105, 29, icons.IconHand)
-    
+
     def touch_gesture(self, gesture, duration, pressure_max, x_start, x_end, y_start, y_end, age):
         pass
 
@@ -229,7 +229,7 @@ class GraphScreen(Screen):
                 self.num -= 1
                 self.lcd.clear_display()
                 self.draw_init()
-        
+
 
 class SensorScreen(Screen):
     text = 'Senso'
@@ -264,7 +264,7 @@ class SensorScreen(Screen):
                 return
         except:
             return
-        
+
         last_value0 = self.tws.outdoor_weather_sensor_last_value[identifier0]
 
         identifier1 = None
@@ -273,7 +273,7 @@ class SensorScreen(Screen):
             last_value1 = self.tws.outdoor_weather_sensor_last_value[identifier1]
         except:
             last_value1 = None
-        
+
 
         temperature = '{0:.1f}'.format(last_value0.temperature/10.0)
         temperature = ' '*(4 - len(temperature)) + temperature
@@ -301,19 +301,19 @@ class SensorScreen(Screen):
             if self.num < ((len(self.keys) + 1)//2) - 1:
                 self.num += 1
                 self.lcd.clear_display()
-                self.draw_init() 
+                self.draw_init()
         elif gesture == self.lcd.GESTURE_TOP_TO_BOTTOM:
             if self.num > 0:
                 self.num -= 1
                 self.lcd.clear_display()
-                self.draw_init() 
+                self.draw_init()
 
 class StationScreen(Screen):
     text       = 'Stati'
     icon       = icons.IconTabStation
-    directions = [('N', 0, -7), ('NNE', 3, -6), ('NE', 5, -5), ('ENE', 6, -3), 
-                  ('E', 7, 0), ('ESE', 6, 3), ('SE', 5, 5), ('SSE', 3, 6), 
-                  ('S', 0, 7), ('SSW', -3, 6), ('SW', -5, 5), ('WSW', -6, 3), 
+    directions = [('N', 0, -7), ('NNE', 3, -6), ('NE', 5, -5), ('ENE', 6, -3),
+                  ('E', 7, 0), ('ESE', 6, 3), ('SE', 5, 5), ('SSE', 3, 6),
+                  ('S', 0, 7), ('SSW', -3, 6), ('SW', -5, 5), ('WSW', -6, 3),
                   ('W', -7, 0), ('WNW', -6, -3), ('NW', -5, -5), ('NNW', -3, -6)]
 
     def __init__(self, keys):
@@ -337,7 +337,7 @@ class StationScreen(Screen):
         self.lcd.draw_line(48, 0, 48, 52, self.lcd.COLOR_BLACK)
         self.lcd.draw_line(96, 0, 96, 52, self.lcd.COLOR_BLACK)
         self.draw_update()
-    
+
     def draw_update(self):
         try:
             identifier = self.keys[self.num]
@@ -345,7 +345,7 @@ class StationScreen(Screen):
                 return
         except:
             return
-        
+
         last_value  = self.tws.outdoor_weather_station_last_value[identifier]
         # Get rain for period of 60*60 seconds (mm/h)
         period_rain = self.vdb.get_data_rain_period(identifier, 60*60)
@@ -396,12 +396,12 @@ class StationScreen(Screen):
             if self.num < len(self.keys)-1:
                 self.num += 1
                 self.lcd.clear_display()
-                self.draw_init() 
+                self.draw_init()
         elif gesture == self.lcd.GESTURE_TOP_TO_BOTTOM:
             if self.num > 0:
                 self.num -= 1
                 self.lcd.clear_display()
-                self.draw_init() 
+                self.draw_init()
 
 class SettingsScreen(Screen):
     text = "Conf"
@@ -423,7 +423,7 @@ class SettingsScreen(Screen):
 
     def draw_init(self):
         self.lcd.draw_text(0, 0, self.lcd.FONT_6X8, self.lcd.COLOR_BLACK, 'Settings: ' + self.settings[self.num])
-        self.draw_icon(108, 11, icons.IconRightSwipeUpDown) 
+        self.draw_icon(108, 11, icons.IconRightSwipeUpDown)
 
         self.lcd.draw_line(108, 16, 113, 11, self.num != len(self.settings)-1)
         self.lcd.draw_line(113, 11, 118, 16, self.num != len(self.settings)-1)
@@ -452,7 +452,7 @@ class SettingsScreen(Screen):
     def slider_value(self, index, value):
         if self.num == 0:
             conf = self.lcd.get_display_configuration()
-            
+
             if index == 0:
                 self.lcd.set_display_configuration(conf.contrast, value*100/67, conf.invert, conf.automatic_draw)
             elif index == 1:
@@ -487,7 +487,7 @@ class SettingsScreen(Screen):
                 self.lcd.remove_gui_slider(255)
                 self.lcd.clear_display()
                 self.draw_init()
-        
+
 
 screens = []
 screen_selected = None
@@ -496,11 +496,11 @@ def screen_init(initial_init = True, stations = [], sensors = []):
     global screens, screen_selected
     if Screen.lcd == None:
         return
-   
+
     if initial_init:
         Screen.lcd.set_gui_tab_configuration(Screen.lcd.CHANGE_TAB_ON_CLICK, False)
         Screen.lcd.remove_all_gui()
-        Screen.lcd.clear_display() 
+        Screen.lcd.clear_display()
 
     screens = [IndoorScreen(), GraphScreen(stations, sensors)]
     if stations != []:
@@ -521,7 +521,7 @@ def screen_init(initial_init = True, stations = [], sensors = []):
 
     if initial_init:
         screen_selected = screens[0]
-        Screen.lcd.set_gui_tab_selected(0) 
+        Screen.lcd.set_gui_tab_selected(0)
         screen_tab_selected(0)
 
 def screen_update_tabs():
@@ -532,7 +532,7 @@ def screen_update_tabs():
             station_screen = screen
         elif screen.__class__ == SensorScreen:
             sensor_screen = screen
-    
+
     station_keys = list(Screen.tws.outdoor_weather_station_last_value.keys())
     sensor_keys  = list(Screen.tws.outdoor_weather_sensor_last_value.keys())
     if ((len(station_keys) > 0) and (station_screen == None)) or \

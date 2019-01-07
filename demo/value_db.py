@@ -40,7 +40,7 @@ class ValueDB:
         self.db = sqlite3.connect(os.path.join(cur_path, 'tabletop_weather_station.db'))
         self.dbc = self.db.cursor()
         self.create()
-        
+
         self.init_lock.release()
 
         while self.run:
@@ -49,7 +49,7 @@ class ValueDB:
                 func(*data)
             except Empty:
                 pass
-        
+
     def set_setting(self, key, value):
         if threading.current_thread() != self.thread:
             self.func_queue.put((self.set_setting, (key, value)))
@@ -74,7 +74,7 @@ class ValueDB:
         if threading.current_thread() != self.thread:
             self.func_queue.put((self.get_data, (num, time_resolution, field, table, identifier, is_rain)))
             return self.func_queue_ret.get()
-        
+
         count_str = 'count'
         if time_resolution < 60:
             count_str = '1'
@@ -125,10 +125,10 @@ class ValueDB:
         ret = [averaged_values[-1]]*(num-len(averaged_values))
         for value in reversed(averaged_values):
             ret.append(value)
-        
+
         self.func_queue_ret.put(ret)
 
-    def get_data_air_quality(self, num, time_resolution, field):        
+    def get_data_air_quality(self, num, time_resolution, field):
         return self.get_data(num, time_resolution, field, 'air_quality')
 
     def get_data_station(self, num, time_resolution, field, identifier):
@@ -136,13 +136,13 @@ class ValueDB:
 
     def get_data_sensor(self, num, time_resolution, field, identifier):
         return self.get_data(num, time_resolution, field, 'sensor', identifier)
-    
+
     def get_data_rain_period_list(self, num, rain_period, identifier):
         values = self.get_data(num+1, rain_period, 'rain', 'station', identifier, True)
         rain_values = []
         for i in range(1, len(values)):
             rain_values.append(values[i] - values[i-1])
-        
+
         return rain_values
 
     def get_data_rain_period(self, identifier, rain_period):
@@ -163,24 +163,23 @@ class ValueDB:
         except:
             self.func_queue_ret.put(None)
 
-
     def add_data_air_quality(self, iaq_index, iaq_index_accuracy, temperature, humidity, air_pressure):
         if threading.current_thread() != self.thread:
             self.func_queue.put((self.add_data_air_quality, (iaq_index, iaq_index_accuracy, temperature, humidity, air_pressure)))
             return
 
         self.dbc.execute("""
-            INSERT INTO air_quality (iaq_index, iaq_index_accuracy, temperature, humidity, air_pressure) 
+            INSERT INTO air_quality (iaq_index, iaq_index_accuracy, temperature, humidity, air_pressure)
             VALUES (?, ?, ?, ?, ?)""",
             (iaq_index, iaq_index_accuracy, temperature, humidity, air_pressure)
         )
 
         self.dbc.execute("""
-            UPDATE air_quality_minute 
-            SET iaq_index          = iaq_index + ?, 
-                iaq_index_accuracy = iaq_index_accuracy + ?, 
-                temperature        = temperature + ?, 
-                humidity           = humidity + ?, 
+            UPDATE air_quality_minute
+            SET iaq_index          = iaq_index + ?,
+                iaq_index_accuracy = iaq_index_accuracy + ?,
+                temperature        = temperature + ?,
+                humidity           = humidity + ?,
                 air_pressure       = air_pressure + ?,
                 count              = count + 1
             WHERE time = (strftime('%s', 'now') - (strftime('%s', 'now') % 60))""",
@@ -188,17 +187,17 @@ class ValueDB:
         )
 
         self.dbc.execute("""
-            INSERT OR IGNORE INTO air_quality_minute (iaq_index, iaq_index_accuracy, temperature, humidity, air_pressure) 
+            INSERT OR IGNORE INTO air_quality_minute (iaq_index, iaq_index_accuracy, temperature, humidity, air_pressure)
             VALUES (?, ?, ?, ?, ?)""",
             (iaq_index, iaq_index_accuracy, temperature, humidity, air_pressure)
         )
 
         self.dbc.execute("""
             UPDATE air_quality_hour
-            SET iaq_index          = iaq_index + ?, 
-                iaq_index_accuracy = iaq_index_accuracy + ?, 
-                temperature        = temperature + ?, 
-                humidity           = humidity + ?, 
+            SET iaq_index          = iaq_index + ?,
+                iaq_index_accuracy = iaq_index_accuracy + ?,
+                temperature        = temperature + ?,
+                humidity           = humidity + ?,
                 air_pressure       = air_pressure + ?,
                 count              = count + 1
             WHERE time = (strftime('%s', 'now') - (strftime('%s', 'now') % 3600))""",
@@ -206,17 +205,17 @@ class ValueDB:
         )
 
         self.dbc.execute("""
-            INSERT OR IGNORE INTO air_quality_hour (iaq_index, iaq_index_accuracy, temperature, humidity, air_pressure) 
+            INSERT OR IGNORE INTO air_quality_hour (iaq_index, iaq_index_accuracy, temperature, humidity, air_pressure)
             VALUES (?, ?, ?, ?, ?)""",
             (iaq_index, iaq_index_accuracy, temperature, humidity, air_pressure)
         )
 
         self.dbc.execute("""
             UPDATE air_quality_day
-            SET iaq_index          = iaq_index + ?, 
-                iaq_index_accuracy = iaq_index_accuracy + ?, 
-                temperature        = temperature + ?, 
-                humidity           = humidity + ?, 
+            SET iaq_index          = iaq_index + ?,
+                iaq_index_accuracy = iaq_index_accuracy + ?,
+                temperature        = temperature + ?,
+                humidity           = humidity + ?,
                 air_pressure       = air_pressure + ?,
                 count              = count + 1
             WHERE time = (strftime('%s', 'now') - (strftime('%s', 'now') % 86400))""",
@@ -224,7 +223,7 @@ class ValueDB:
         )
 
         self.dbc.execute("""
-            INSERT OR IGNORE INTO air_quality_day (iaq_index, iaq_index_accuracy, temperature, humidity, air_pressure) 
+            INSERT OR IGNORE INTO air_quality_day (iaq_index, iaq_index_accuracy, temperature, humidity, air_pressure)
             VALUES (?, ?, ?, ?, ?)""",
             (iaq_index, iaq_index_accuracy, temperature, humidity, air_pressure)
         )
@@ -237,15 +236,15 @@ class ValueDB:
             return
 
         self.dbc.execute("""
-            INSERT INTO station (identifier, temperature, humidity, wind_speed, gust_speed, rain, wind_direction, battery_low) 
+            INSERT INTO station (identifier, temperature, humidity, wind_speed, gust_speed, rain, wind_direction, battery_low)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
             (identifier, temperature, humidity, wind_speed, gust_speed, rain, wind_direction, battery_low)
         )
 
         self.dbc.execute("""
-            UPDATE station_minute 
-            SET temperature = temperature + ?, 
-                humidity    = humidity + ?, 
+            UPDATE station_minute
+            SET temperature = temperature + ?,
+                humidity    = humidity + ?,
                 wind_speed  = wind_speed + ?,
                 gust_speed  = MAX(gust_speed, ?),
                 rain        = ?,
@@ -255,15 +254,15 @@ class ValueDB:
         )
 
         self.dbc.execute("""
-            INSERT OR IGNORE INTO station_minute (identifier, temperature, humidity, wind_speed, gust_speed, rain) 
+            INSERT OR IGNORE INTO station_minute (identifier, temperature, humidity, wind_speed, gust_speed, rain)
             VALUES (?, ?, ?, ?, ?, ?)""",
             (identifier, temperature, humidity, wind_speed, gust_speed, rain)
         )
 
         self.dbc.execute("""
-            UPDATE station_hour 
-            SET temperature = temperature + ?, 
-                humidity    = humidity + ?, 
+            UPDATE station_hour
+            SET temperature = temperature + ?,
+                humidity    = humidity + ?,
                 wind_speed  = wind_speed + ?,
                 gust_speed  = MAX(gust_speed, ?),
                 rain        = ?,
@@ -273,15 +272,15 @@ class ValueDB:
         )
 
         self.dbc.execute("""
-            INSERT OR IGNORE INTO station_hour (identifier, temperature, humidity, wind_speed, gust_speed, rain) 
+            INSERT OR IGNORE INTO station_hour (identifier, temperature, humidity, wind_speed, gust_speed, rain)
             VALUES (?, ?, ?, ?, ?, ?)""",
             (identifier, temperature, humidity, wind_speed, gust_speed, rain)
         )
 
         self.dbc.execute("""
-            UPDATE station_day 
-            SET temperature = temperature + ?, 
-                humidity    = humidity + ?, 
+            UPDATE station_day
+            SET temperature = temperature + ?,
+                humidity    = humidity + ?,
                 wind_speed  = wind_speed + ?,
                 gust_speed  = MAX(gust_speed, ?),
                 rain        = ?,
@@ -291,65 +290,65 @@ class ValueDB:
         )
 
         self.dbc.execute("""
-            INSERT OR IGNORE INTO station_day (identifier, temperature, humidity, wind_speed, gust_speed, rain) 
+            INSERT OR IGNORE INTO station_day (identifier, temperature, humidity, wind_speed, gust_speed, rain)
             VALUES (?, ?, ?, ?, ?, ?)""",
             (identifier, temperature, humidity, wind_speed, gust_speed, rain)
         )
 
         self.db.commit()
-    
+
     def add_data_sensor(self, identifier, temperature, humidity):
         if threading.current_thread() != self.thread:
             self.func_queue.put((self.add_data_sensor, (identifier, temperature, humidity)))
             return
-        
+
         self.dbc.execute("""
-            INSERT INTO sensor (identifier, temperature, humidity) 
+            INSERT INTO sensor (identifier, temperature, humidity)
             VALUES (?, ?, ?)""",
             (identifier, temperature, humidity)
         )
 
         self.dbc.execute("""
-            UPDATE sensor_minute 
-            SET temperature = temperature + ?, 
-                humidity    = humidity + ?, 
+            UPDATE sensor_minute
+            SET temperature = temperature + ?,
+                humidity    = humidity + ?,
                 count       = count + 1
             WHERE (time = (strftime('%s', 'now') - (strftime('%s', 'now') % 60))) AND (identifier = ?)""",
             (temperature, humidity, identifier)
         )
 
         self.dbc.execute("""
-            INSERT OR IGNORE INTO sensor_minute (identifier, temperature, humidity) 
+            INSERT OR IGNORE INTO sensor_minute (identifier, temperature, humidity)
             VALUES (?, ?, ?)""",
             (identifier, temperature, humidity)
         )
 
         self.dbc.execute("""
-            UPDATE sensor_hour 
-            SET temperature = temperature + ?, 
-                humidity    = humidity + ?, 
+            UPDATE sensor_hour
+            SET temperature = temperature + ?,
+                humidity    = humidity + ?,
                 count       = count + 1
             WHERE (time = (strftime('%s', 'now') - (strftime('%s', 'now') % 3600))) AND (identifier = ?)""",
             (temperature, humidity, identifier)
         )
 
         self.dbc.execute("""
-            INSERT OR IGNORE INTO sensor_hour (identifier, temperature, humidity) 
+            INSERT OR IGNORE INTO sensor_hour (identifier, temperature, humidity)
             VALUES (?, ?, ?)""",
             (identifier, temperature, humidity)
         )
 
         self.dbc.execute("""
-            UPDATE sensor_day 
-            SET temperature = temperature + ?, 
-                humidity    = humidity + ?, 
+            UPDATE sensor_day
+            SET temperature = temperature + ?,
+                humidity    = humidity + ?,
                 count       = count + 1
             WHERE (time = (strftime('%s', 'now') - (strftime('%s', 'now') % 86400))) AND (identifier = ?)""",
             (temperature, humidity, identifier)
         )
 
         self.dbc.execute("""
-            INSERT OR IGNORE INTO sensor_day (identifier, temperature, humidity) 
+            INSERT OR IGNORE INTO sensor_day (identifier, temperature, humidity)
             VALUES (?, ?, ?)""",
             (identifier, temperature, humidity)
         )
@@ -361,10 +360,10 @@ class ValueDB:
             CREATE TABLE IF NOT EXISTS air_quality (
                 id integer primary key,
                 time timestamp default (strftime('%s', 'now')),
-                iaq_index integer, 
-                iaq_index_accuracy integer, 
-                temperature integer, 
-                humidity integer, 
+                iaq_index integer,
+                iaq_index_accuracy integer,
+                temperature integer,
+                humidity integer,
                 air_pressure integer
             )"""
         )
@@ -373,9 +372,9 @@ class ValueDB:
             CREATE TABLE IF NOT EXISTS air_quality_minute (
                 id integer primary key,
                 time timestamp unique default (strftime('%s', 'now') - (strftime('%s', 'now')%60)),
-                iaq_index integer, 
-                iaq_index_accuracy integer, 
-                temperature integer, 
+                iaq_index integer,
+                iaq_index_accuracy integer,
+                temperature integer,
                 humidity integer,
                 air_pressure integer,
                 count integer default 1
@@ -386,9 +385,9 @@ class ValueDB:
             CREATE TABLE IF NOT EXISTS air_quality_hour (
                 id integer primary key,
                 time timestamp unique default (strftime('%s', 'now') - (strftime('%s', 'now')%3600)),
-                iaq_index integer, 
-                iaq_index_accuracy integer, 
-                temperature integer, 
+                iaq_index integer,
+                iaq_index_accuracy integer,
+                temperature integer,
                 humidity integer,
                 air_pressure integer,
                 count integer default 1
@@ -399,9 +398,9 @@ class ValueDB:
             CREATE TABLE IF NOT EXISTS air_quality_day (
                 id integer primary key,
                 time timestamp unique default (strftime('%s', 'now') - (strftime('%s', 'now')%86400)),
-                iaq_index integer, 
-                iaq_index_accuracy integer, 
-                temperature integer, 
+                iaq_index integer,
+                iaq_index_accuracy integer,
+                temperature integer,
                 humidity integer,
                 air_pressure integer,
                 count integer default 1
@@ -532,4 +531,4 @@ class ValueDB:
         self.thread = threading.Thread(target=self.loop)
         self.thread.start()
         self.init_lock.acquire()
-        
+
