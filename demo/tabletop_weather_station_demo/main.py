@@ -366,6 +366,7 @@ def main():
 
         tray_icon = QtGui.QSystemTrayIcon(QtGui.QIcon(load_pixmap('tabletop_weather_station_demo-icon.png')), None)
         tray_icon.activated.connect(tray_icon_activated)
+        tray_icon.setToolTip('Tabletop Weather Station Demo')
 
         tray_menu = QtGui.QMenu(None)
 
