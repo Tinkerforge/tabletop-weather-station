@@ -1,0 +1,2 @@
+#!/bin/sh
+python /usr/share/tabletop_weather_station_demo/main.py "$@"

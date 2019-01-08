@@ -1,4 +1,6 @@
 *.pyc
 *.swp
-demo/tinkerforge
-demo/tabletop_weather_station.db
+demo/build
+demo/dist
+demo/tabletop_weather_station_demo/frozen_images.py
+demo/tabletop-weather-station-*.deb

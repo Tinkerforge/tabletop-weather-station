@@ -1,0 +1,11 @@
+Package: tabletop-weather-station-demo
+Version: <<VERSION>>
+Section: electronics
+Maintainer: Matthias Bolte <matthias@tinkerforge.com>
+Architecture: all
+Priority: optional
+Installed-Size: <<INSTALLED_SIZE>>
+Depends: python, python-qt4
+Description: Tabletop Weather Station Demo
+ This demo provides a small program to demonstrate the features of the
+ Tabletop Weather Station from Tinkerforge (see www.tinkerforge.com)
