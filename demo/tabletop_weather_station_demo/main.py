@@ -114,7 +114,7 @@ if gui:
             self.log_edit.appendPlainText(entry)
             self.log_edit.centerCursor()
 
-class TabletopWeatherStation:
+class TabletopWeatherStation(object):
     HOST = "localhost"
     PORT = 4223
 
