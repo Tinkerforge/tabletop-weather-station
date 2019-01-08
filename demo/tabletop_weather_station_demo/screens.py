@@ -274,7 +274,6 @@ class SensorScreen(Screen):
         except:
             last_value1 = None
 
-
         temperature = '{0:.1f}'.format(last_value0.temperature/10.0)
         temperature = ' '*(4 - len(temperature)) + temperature
         humidity    = '{0:.1f}'.format(last_value0.humidity)

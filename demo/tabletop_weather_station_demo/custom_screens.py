@@ -22,8 +22,6 @@ class ClockScreen(Screen):
         current_time = time.strftime("%H:%M:%S")
         self.lcd.draw_text(16, 30, self.lcd.FONT_12X16, self.lcd.COLOR_BLACK, current_time)
 
-
-
 ################################################
 # Add your custom screens and tab position here:
 

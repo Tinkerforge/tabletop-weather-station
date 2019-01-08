@@ -56,7 +56,6 @@ class TabletopWeatherStation:
     graph_resolution_index = None
     logging_period_index = None
 
-
     def update_graph_resolution(self):
         index = self.vdb.get_setting('graph_resolution')
         if index == None:
@@ -185,7 +184,6 @@ class TabletopWeatherStation:
                 except Error as e:
                     log.error('Outdoor Weather Bricklet init failed: ' + str(e.description))
                     self.outdoor_weather = None
-
 
     def cb_connected(self, connected_reason):
         if connected_reason == IPConnection.CONNECT_REASON_AUTO_RECONNECT:
