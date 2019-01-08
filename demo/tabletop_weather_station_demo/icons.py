@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # These icons are generated with the "icon_from_image.py"-script
-# The script and image data can be found in the data/ folder
+# The script and image data can be found in the ../data/ folder
 
 def rotate_left_90(icon):
     class IconRotated(Icon):
