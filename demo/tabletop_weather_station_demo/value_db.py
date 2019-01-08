@@ -41,7 +41,7 @@ class ValueDB:
         self.dbc = self.db.cursor()
         self.create()
 
-        self.init_lock.release()
+        self.init_handshake.release()
 
         while self.run:
             try:
@@ -527,8 +527,7 @@ class ValueDB:
         self.run = True
         self.func_queue = Queue()
         self.func_queue_ret = Queue()
-        self.init_lock = threading.Lock()
+        self.init_handshake = threading.Semaphore(value=0)
         self.thread = threading.Thread(target=self.loop)
         self.thread.start()
-        self.init_lock.acquire()
-
+        self.init_handshake.acquire()
