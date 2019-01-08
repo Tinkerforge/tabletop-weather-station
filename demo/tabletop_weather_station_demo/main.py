@@ -321,10 +321,6 @@ def main():
 
         app = QtGui.QApplication(sys.argv)
 
-        signal.signal(signal.SIGINT, lambda *args: app.quit())
-        signal.signal(signal.SIGTERM, lambda *args: app.quit())
-        signal.signal(signal.SIGQUIT, lambda *args: app.quit())
-
         main_widget = QtGui.QWidget()
         main_widget.setWindowIcon(QtGui.QIcon(load_pixmap('tabletop_weather_station_demo-icon.png')))
         main_widget.setWindowTitle('Tabletop Weather Station Demo ' + DEMO_VERSION)
@@ -393,6 +389,14 @@ def main():
         thread.daemon = True
         thread.start()
 
+        def quit_(*args):
+            log.info('Exiting')
+            app.quit()
+
+        signal.signal(signal.SIGINT, quit_)
+        signal.signal(signal.SIGTERM, quit_)
+        signal.signal(signal.SIGQUIT, quit_)
+
         ec = app.exec_()
 
         run_ref[0] = False
@@ -400,6 +404,7 @@ def main():
         thread.join(2)
     else:
         def quit_(*args):
+            log.info('Exiting')
             run_ref[0] = False
             stop_queue.put(None)
 
