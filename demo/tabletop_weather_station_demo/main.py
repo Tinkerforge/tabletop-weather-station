@@ -45,6 +45,7 @@ log.basicConfig(format='%(asctime)s <%(levelname)s> %(message)s', level=log.INFO
 
 import time
 import threading
+import socket
 
 try:
     import Queue as queue
