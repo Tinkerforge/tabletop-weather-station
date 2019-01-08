@@ -28,12 +28,17 @@ import threading
 import time
 
 try:
-    from Queue import Queue, Empty
+    import Queue as queue
 except:
-    from queue import Queue, Empty
+    import queue
 
 class ValueDB:
     air_quality_first_data = None
+
+    def stop(self):
+        self.run = False
+        self.func_queue.put(None)
+        self.thread.join(2)
 
     def loop(self):
         self.db = sqlite3.connect(os.path.join(os.path.expanduser('~'), '.tabletop_weather_station_demo.db'))
@@ -43,11 +48,21 @@ class ValueDB:
         self.init_handshake.release()
 
         while self.run:
+            func_data = self.func_queue.get()
+
+            if func_data == None:
+                break
+
+            func, data = func_data
+            func(*data)
+
+        # unblock all pending calls
+        while True:
             try:
-                func, data = self.func_queue.get(True, 0.25)
-                func(*data)
-            except Empty:
-                pass
+                self.func_queue.get(block=False)
+                self.func_queue_ret.put(None)
+            except queue.Empty:
+                break
 
     def set_setting(self, key, value):
         if threading.current_thread() != self.thread:
@@ -524,9 +539,10 @@ class ValueDB:
 
     def __init__(self):
         self.run = True
-        self.func_queue = Queue()
-        self.func_queue_ret = Queue()
+        self.func_queue = queue.Queue()
+        self.func_queue_ret = queue.Queue()
         self.init_handshake = threading.Semaphore(value=0)
         self.thread = threading.Thread(target=self.loop)
+        self.thread.daemon = True
         self.thread.start()
         self.init_handshake.acquire()

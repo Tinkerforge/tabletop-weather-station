@@ -23,7 +23,66 @@ Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.
 """
 
+import sys
+
+if hasattr(sys, 'frozen'):
+    gui = True
+else:
+    gui = '--gui' in sys.argv[1:]
+
+if gui:
+    import sip
+    sip.setapi('QString', 2)
+    sip.setapi('QVariant', 2)
+
+    from PyQt4 import QtCore, QtGui
+
+import os
+import signal
+
+import logging as log
+log.basicConfig(format='%(asctime)s <%(levelname)s> %(message)s', level=log.INFO)
+
+import time
 import threading
+
+try:
+    import Queue as queue
+except:
+    import queue
+
+def prepare_package(package_name):
+    # from http://www.py2exe.org/index.cgi/WhereAmI
+    if hasattr(sys, 'frozen'):
+        program_file_raw = sys.executable
+    else:
+        program_file_raw = __file__
+
+    if sys.hexversion < 0x03000000:
+        program_file = unicode(program_file_raw, sys.getfilesystemencoding())
+    else:
+        program_file = program_file_raw
+
+    program_path = os.path.dirname(os.path.realpath(program_file))
+
+    # add program_path so OpenGL is properly imported
+    sys.path.insert(0, program_path)
+
+    # allow the program to be directly started by calling 'main.py'
+    # without '<package_name>' being in the path already
+    if not package_name in sys.modules:
+        head, tail = os.path.split(program_path)
+
+        if not head in sys.path:
+            sys.path.insert(0, head)
+
+        if not hasattr(sys, 'frozen'):
+            # load and inject in modules list, this allows to have the source in a
+            # directory named differently than '<package_name>'
+            sys.modules[package_name] = __import__(tail, globals(), locals(), [], -1)
+
+prepare_package('tabletop_weather_station_demo')
+
 from tinkerforge.ip_connection import IPConnection
 from tinkerforge.ip_connection import Error
 from tinkerforge.bricklet_lcd_128x64 import BrickletLCD128x64
@@ -32,12 +91,28 @@ from tinkerforge.bricklet_outdoor_weather import BrickletOutdoorWeather, GetStat
 
 from tabletop_weather_station_demo.screens import screen_set_lcd, screen_tab_selected, screen_touch_gesture, screen_update, screen_slider_value, Screen, TIME_SECONDS
 from tabletop_weather_station_demo.value_db import ValueDB
+from tabletop_weather_station_demo.config import DEMO_VERSION
 
-import logging as log
-log.basicConfig(level=log.INFO)
+if gui:
+    class GUIHandler(QtCore.QObject, log.Handler):
+        qtcb_add = QtCore.pyqtSignal(str)
 
-import sys
-import time
+        def __init__(self, log_edit):
+            QtCore.QObject.__init__(self, log_edit)
+            log.Handler.__init__(self)
+
+            self.log_edit = log_edit
+
+            self.qtcb_add.connect(self.cb_add)
+
+        def emit(self, record):
+            entry = self.format(record)
+
+            self.qtcb_add.emit(entry)
+
+        def cb_add(self, entry):
+            self.log_edit.appendPlainText(entry)
+            self.log_edit.centerCursor()
 
 class TabletopWeatherStation:
     HOST = "localhost"
@@ -221,27 +296,128 @@ class TabletopWeatherStation:
             self.vdb.add_data_air_quality(iaq_index, iaq_index_accuracy, temperature, humidity, air_pressure)
             self.last_air_quality_time = now
 
-if __name__ == "__main__":
+def loop(tws, run_ref, stop_queue):
+    while run_ref[0]:
+        tws.update_lock.acquire()
+
+        try:
+            screen_update()
+        except:
+            log.exception('Error during screen update')
+
+        tws.update_lock.release()
+
+        try:
+            stop_queue.get(timeout=1.0)
+            break
+        except queue.Empty:
+            pass
+
+def main():
     log.info('Tabletop Weather Station: Start')
+
+    if gui:
+        from tabletop_weather_station_demo.load_pixmap import load_pixmap
+
+        app = QtGui.QApplication(sys.argv)
+
+        signal.signal(signal.SIGINT, lambda *args: app.quit())
+        signal.signal(signal.SIGTERM, lambda *args: app.quit())
+        signal.signal(signal.SIGQUIT, lambda *args: app.quit())
+
+        main_widget = QtGui.QWidget()
+        main_widget.setWindowIcon(QtGui.QIcon(load_pixmap('tabletop_weather_station_demo-icon.png')))
+        main_widget.setWindowTitle('Tabletop Weather Station Demo ' + DEMO_VERSION)
+        main_widget.setMinimumSize(800, 450)
+
+        button_layout = QtGui.QHBoxLayout()
+
+        main_layout = QtGui.QVBoxLayout()
+
+        log_edit = QtGui.QPlainTextEdit(main_widget)
+        log_edit.setReadOnly(True)
+        log_edit.setLineWrapMode(QtGui.QPlainTextEdit.NoWrap)
+
+        log_handler = GUIHandler(log_edit)
+        log_handler.setFormatter(log.Formatter('%(asctime)s <%(levelname)s> %(message)s'))
+
+        log.getLogger().addHandler(log_handler)
+
+        hide_button = QtGui.QPushButton('Hide', main_widget)
+        hide_button.setVisible(QtGui.QSystemTrayIcon.isSystemTrayAvailable())
+        hide_button.clicked.connect(main_widget.hide)
+
+        exit_button = QtGui.QPushButton('Exit', main_widget)
+        exit_button.clicked.connect(app.quit)
+
+        button_layout.addWidget(hide_button)
+        button_layout.addWidget(exit_button)
+
+        main_layout.addWidget(log_edit)
+        main_layout.addLayout(button_layout)
+
+        main_widget.setLayout(main_layout)
+        main_widget.show()
+
+        def tray_icon_activated(reason):
+            if reason != QtGui.QSystemTrayIcon.Context:
+                main_widget.show()
+                tray_icon.hide()
+
+        tray_icon = QtGui.QSystemTrayIcon(QtGui.QIcon(load_pixmap('tabletop_weather_station_demo-icon.png')), None)
+        tray_icon.activated.connect(tray_icon_activated)
+
+        tray_menu = QtGui.QMenu(None)
+
+        tray_show_action = tray_menu.addAction('Show')
+        tray_show_action.triggered.connect(main_widget.show)
+        tray_show_action.triggered.connect(tray_icon.hide)
+
+        tray_exit_action = tray_menu.addAction('Exit')
+        tray_exit_action.triggered.connect(app.quit)
+
+        tray_icon.setContextMenu(tray_menu)
+
+        hide_button.clicked.connect(tray_icon.show)
 
     vdb = ValueDB()
     tws = TabletopWeatherStation(vdb)
     Screen.tws = tws
     Screen.vdb = vdb
+    run_ref = [True]
+    stop_queue = queue.Queue()
 
-    try:
-        while True:
-            tws.update_lock.acquire()
-            try:
-                screen_update()
-            except:
-                import traceback
-                traceback.print_exc()
-            tws.update_lock.release()
-            time.sleep(1)
+    if gui:
+        thread = threading.Thread(target=loop, args=(tws, run_ref, stop_queue))
+        thread.daemon = True
+        thread.start()
 
-    except KeyboardInterrupt:
-        if tws.ipcon != None:
-            tws.ipcon.disconnect()
-        vdb.run = False
-        log.info('Tabletop Weather Station: End')
+        ec = app.exec_()
+
+        run_ref[0] = False
+        stop_queue.put(None)
+        thread.join(2)
+    else:
+        def quit_(*args):
+            run_ref[0] = False
+            stop_queue.put(None)
+
+        signal.signal(signal.SIGINT, quit_)
+        signal.signal(signal.SIGTERM, quit_)
+        signal.signal(signal.SIGQUIT, quit_)
+
+        loop(tws, run_ref, stop_queue)
+
+        ec = 0
+
+    vdb.stop()
+
+    if tws.ipcon != None:
+        tws.ipcon.disconnect()
+
+    log.info('Tabletop Weather Station: End')
+
+    sys.exit(ec)
+
+if __name__ == '__main__':
+    main()
