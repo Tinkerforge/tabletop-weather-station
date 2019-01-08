@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import time
-from screens import Screen
+from tabletop_weather_station_demo.screens import Screen
 
 # Simple example for a custom screen.
 # In this example we show the time in HH:MM:SS format.

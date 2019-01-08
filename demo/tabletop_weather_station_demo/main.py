@@ -5,8 +5,7 @@
 Tabletop Weather Station
 Copyright (C) 2018 Olaf Lüke <olaf@tinkerforge.com>
 
-tabletop_weather_station.py: Main implementation for Tinkerforge
-                             Tabletop Weather Station
+main.py: Main implementation for Tinkerforge Tabletop Weather Station
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -24,21 +23,21 @@ Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.
 """
 
+import threading
 from tinkerforge.ip_connection import IPConnection
 from tinkerforge.ip_connection import Error
 from tinkerforge.bricklet_lcd_128x64 import BrickletLCD128x64
 from tinkerforge.bricklet_air_quality import BrickletAirQuality, GetAllValues
 from tinkerforge.bricklet_outdoor_weather import BrickletOutdoorWeather, GetStationData, GetSensorData
 
-from screens import screen_set_lcd, screen_tab_selected, screen_touch_gesture, screen_update, screen_slider_value, Screen, TIME_SECONDS
-from value_db import ValueDB
+from tabletop_weather_station_demo.screens import screen_set_lcd, screen_tab_selected, screen_touch_gesture, screen_update, screen_slider_value, Screen, TIME_SECONDS
+from tabletop_weather_station_demo.value_db import ValueDB
 
 import logging as log
 log.basicConfig(level=log.INFO)
 
 import sys
 import time
-from threading import Lock
 
 class TabletopWeatherStation:
     HOST = "localhost"
@@ -80,7 +79,7 @@ class TabletopWeatherStation:
         # We use this lock to make sure that there is never an update at the
         # same time as a gesture or GUI callback. Otherwise we might draw two
         # different GUI elements at the same time.
-        self.update_lock = Lock()
+        self.update_lock = threading.Lock()
 
         self.last_air_quality_time = 0
         self.last_station_time = 0

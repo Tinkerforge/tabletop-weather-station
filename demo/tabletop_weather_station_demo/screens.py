@@ -22,7 +22,7 @@ Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.
 """
 
-import icons
+from tabletop_weather_station_demo import icons
 
 TIME_SHORTCUTS = ['1s', '2s', '5s', '10s', '30s', '1m', '2m', '5m', '10m', '30m', '1h', '2h', '4h', '8h', '12h', '1d', '10d', '1M']
 TIME_STRINGS   = ['1 second', '2 seconds', '5 seconds', '10 seconds', '30 seconds', '1 minute', '2 minutes', '5 minutes', '10 minutes', '30 minutes', '1 hour', '2 hours', '4 hours', '8 hours', '12 hours', '1 day', '10 days', '1 month']
