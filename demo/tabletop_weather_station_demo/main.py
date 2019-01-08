@@ -314,8 +314,6 @@ def loop(tws, run_ref, stop_queue):
             pass
 
 def main():
-    log.info('Tabletop Weather Station: Start')
-
     if gui:
         from tabletop_weather_station_demo.load_pixmap import load_pixmap
 
@@ -333,11 +331,16 @@ def main():
         log_edit = QtGui.QPlainTextEdit(main_widget)
         log_edit.setReadOnly(True)
         log_edit.setLineWrapMode(QtGui.QPlainTextEdit.NoWrap)
+        log_edit.setMaximumBlockCount(3000)
 
         log_handler = GUIHandler(log_edit)
         log_handler.setFormatter(log.Formatter('%(asctime)s <%(levelname)s> %(message)s'))
 
         log.getLogger().addHandler(log_handler)
+
+        for other in log.getLogger().handlers:
+            if other != log_handler:
+                log.getLogger().removeHandler(other)
 
         hide_button = QtGui.QPushButton('Hide', main_widget)
         hide_button.setVisible(QtGui.QSystemTrayIcon.isSystemTrayAvailable())
@@ -376,6 +379,8 @@ def main():
         tray_icon.setContextMenu(tray_menu)
 
         hide_button.clicked.connect(tray_icon.show)
+
+    log.info('Tabletop Weather Station: Start')
 
     vdb = ValueDB()
     tws = TabletopWeatherStation(vdb)
