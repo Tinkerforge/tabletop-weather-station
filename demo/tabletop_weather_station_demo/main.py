@@ -382,7 +382,7 @@ def main():
 
     log.info('Tabletop Weather Station: Start')
 
-    vdb = ValueDB()
+    vdb = ValueDB(gui)
     tws = TabletopWeatherStation(vdb)
     Screen.tws = tws
     Screen.vdb = vdb

@@ -26,6 +26,7 @@ import sqlite3
 import os
 import threading
 import time
+import logging as log
 
 try:
     import Queue as queue
@@ -41,7 +42,16 @@ class ValueDB:
         self.thread.join(2)
 
     def loop(self):
-        self.db = sqlite3.connect(os.path.join(os.path.expanduser('~'), '.tabletop_weather_station_demo.db'))
+        db_name = '.tabletop_weather_station_demo.db'
+
+        if self.gui:
+            db_path = os.path.join(os.path.expanduser('~'), db_name)
+        else:
+            db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), db_name)
+
+        log.info('Using database: {0}'.format(db_path))
+
+        self.db = sqlite3.connect(db_path)
         self.dbc = self.db.cursor()
         self.create()
 
@@ -537,7 +547,8 @@ class ValueDB:
 
         self.db.commit()
 
-    def __init__(self):
+    def __init__(self, gui):
+        self.gui = gui
         self.run = True
         self.func_queue = queue.Queue()
         self.func_queue_ret = queue.Queue()
