@@ -145,8 +145,10 @@ class TabletopWeatherStation(object):
             self.vdb.set_setting('logging_period', '1')
         self.logging_period_index = int(index)
 
-    def __init__(self, vdb):
+    def __init__(self, vdb, run_ref, stop_queue):
         self.vdb = vdb
+        self.run_ref = run_ref
+        self.stop_queue = stop_queue
         self.update_graph_resolution()
         self.update_logging_period()
 
@@ -160,27 +162,42 @@ class TabletopWeatherStation(object):
         self.last_sensor_time = 0
 
         self.ipcon = IPConnection()
-        while True:
+        while self.run_ref[0]:
             try:
                 self.ipcon.connect(TabletopWeatherStation.HOST, TabletopWeatherStation.PORT)
                 break
             except Error as e:
                 log.error('Connection Error: ' + str(e.description))
-                time.sleep(1)
+
+                try:
+                    self.stop_queue.get(timeout=1.0)
+                    break
+                except queue.Empty:
+                    pass
             except socket.error as e:
                 log.error('Socket error: ' + str(e))
-                time.sleep(1)
+
+                try:
+                    self.stop_queue.get(timeout=1.0)
+                    break
+                except queue.Empty:
+                    pass
 
         self.ipcon.register_callback(IPConnection.CALLBACK_ENUMERATE, self.cb_enumerate)
         self.ipcon.register_callback(IPConnection.CALLBACK_CONNECTED, self.cb_connected)
 
-        while True:
+        while self.run_ref[0]:
             try:
                 self.ipcon.enumerate()
                 break
             except Error as e:
                 log.error('Enumerate Error: ' + str(e.description))
-                time.sleep(1)
+
+                try:
+                    self.stop_queue.get(timeout=1.0)
+                    break
+                except queue.Empty:
+                    pass
 
     def update(self):
         if self.lcd128x64 == None:
@@ -264,13 +281,18 @@ class TabletopWeatherStation(object):
         if connected_reason == IPConnection.CONNECT_REASON_AUTO_RECONNECT:
             log.info('Auto Reconnect')
 
-            while True:
+            while self.run_ref[0]:
                 try:
                     self.ipcon.enumerate()
                     break
                 except Error as e:
                     log.error('Enumerate Error: ' + str(e.description))
-                    time.sleep(1)
+
+                    try:
+                        self.stop_queue.get(timeout=1.0)
+                        break
+                    except queue.Empty:
+                        pass
 
     def cb_outdoor_weather_station_data(self, identifier, temperature, humidity, wind_speed, gust_speed, rain, wind_direction, battery_low, last_change = 0):
         self.outdoor_weather_station_last_value[identifier] = GetStationData(temperature, humidity, wind_speed, gust_speed, rain, wind_direction, battery_low, last_change)
@@ -296,7 +318,12 @@ class TabletopWeatherStation(object):
             self.vdb.add_data_air_quality(iaq_index, iaq_index_accuracy, temperature, humidity, air_pressure)
             self.last_air_quality_time = now
 
-def loop(tws, run_ref, stop_queue):
+def loop(run_ref, stop_queue):
+    vdb = ValueDB(gui)
+    tws = TabletopWeatherStation(vdb, run_ref, stop_queue)
+    Screen.tws = tws
+    Screen.vdb = vdb
+
     while run_ref[0]:
         tws.update_lock.acquire()
 
@@ -311,6 +338,14 @@ def loop(tws, run_ref, stop_queue):
             stop_queue.get(timeout=1.0)
             break
         except queue.Empty:
+            pass
+
+    vdb.stop()
+
+    if tws.ipcon != None:
+        try:
+            tws.ipcon.disconnect()
+        except Error:
             pass
 
 def main():
@@ -382,15 +417,11 @@ def main():
 
     log.info('Tabletop Weather Station: Start')
 
-    vdb = ValueDB(gui)
-    tws = TabletopWeatherStation(vdb)
-    Screen.tws = tws
-    Screen.vdb = vdb
     run_ref = [True]
     stop_queue = queue.Queue()
 
     if gui:
-        thread = threading.Thread(target=loop, args=(tws, run_ref, stop_queue))
+        thread = threading.Thread(target=loop, args=(run_ref, stop_queue))
         thread.daemon = True
         thread.start()
 
@@ -417,14 +448,9 @@ def main():
         signal.signal(signal.SIGTERM, quit_)
         signal.signal(signal.SIGQUIT, quit_)
 
-        loop(tws, run_ref, stop_queue)
+        loop(run_ref, stop_queue)
 
         ec = 0
-
-    vdb.stop()
-
-    if tws.ipcon != None:
-        tws.ipcon.disconnect()
 
     log.info('Tabletop Weather Station: End')
 
