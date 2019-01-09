@@ -143,8 +143,9 @@ class ValueDB:
                     averaged_values.append(v)
                 else:
                     averaged_values.append(v/j)
-            else:
-                averaged_values.append(0)
+
+        if len(averaged_values) == 0:
+            averaged_values.append(0)
 
         ret = [averaged_values[-1]]*(num-len(averaged_values))
         for value in reversed(averaged_values):
