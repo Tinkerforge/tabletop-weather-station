@@ -431,7 +431,6 @@ def main():
 
         signal.signal(signal.SIGINT, quit_)
         signal.signal(signal.SIGTERM, quit_)
-        signal.signal(signal.SIGQUIT, quit_)
 
         ec = app.exec_()
 
@@ -446,7 +445,6 @@ def main():
 
         signal.signal(signal.SIGINT, quit_)
         signal.signal(signal.SIGTERM, quit_)
-        signal.signal(signal.SIGQUIT, quit_)
 
         loop(run_ref, stop_queue)
 
