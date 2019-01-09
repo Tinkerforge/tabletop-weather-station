@@ -378,7 +378,7 @@ def main():
                 log.getLogger().removeHandler(other)
 
         hide_button = QtGui.QPushButton('Hide', main_widget)
-        hide_button.setVisible(QtGui.QSystemTrayIcon.isSystemTrayAvailable())
+        hide_button.setVisible(QtGui.QSystemTrayIcon.isSystemTrayAvailable() and sys.platform != 'darwin') # FIXME: systray icon doesn't work properly on macOS, disable for now
         hide_button.clicked.connect(main_widget.hide)
 
         exit_button = QtGui.QPushButton('Exit', main_widget)
