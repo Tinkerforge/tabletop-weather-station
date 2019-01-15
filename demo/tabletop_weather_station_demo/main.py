@@ -84,10 +84,16 @@ def prepare_package(package_name):
 
 prepare_package('tabletop_weather_station_demo')
 
-from tabletop_weather_station_demo.tinkerforge.ip_connection import IPConnection, Error
-from tabletop_weather_station_demo.tinkerforge.bricklet_lcd_128x64 import BrickletLCD128x64
-from tabletop_weather_station_demo.tinkerforge.bricklet_air_quality import BrickletAirQuality, GetAllValues
-from tabletop_weather_station_demo.tinkerforge.bricklet_outdoor_weather import BrickletOutdoorWeather, GetStationData, GetSensorData
+try:
+    from tabletop_weather_station_demo.tinkerforge.ip_connection import IPConnection, Error
+    from tabletop_weather_station_demo.tinkerforge.bricklet_lcd_128x64 import BrickletLCD128x64
+    from tabletop_weather_station_demo.tinkerforge.bricklet_air_quality import BrickletAirQuality, GetAllValues
+    from tabletop_weather_station_demo.tinkerforge.bricklet_outdoor_weather import BrickletOutdoorWeather, GetStationData, GetSensorData
+except ImportError:
+    from tinkerforge.ip_connection import IPConnection, Error
+    from tinkerforge.bricklet_lcd_128x64 import BrickletLCD128x64
+    from tinkerforge.bricklet_air_quality import BrickletAirQuality, GetAllValues
+    from tinkerforge.bricklet_outdoor_weather import BrickletOutdoorWeather, GetStationData, GetSensorData
 
 from tabletop_weather_station_demo.screens import screen_set_lcd, screen_tab_selected, screen_touch_gesture, screen_update, screen_slider_value, Screen, TIME_SECONDS
 from tabletop_weather_station_demo.value_db import ValueDB
