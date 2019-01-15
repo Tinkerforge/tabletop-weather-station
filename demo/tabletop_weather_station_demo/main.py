@@ -80,7 +80,7 @@ def prepare_package(package_name):
         if not hasattr(sys, 'frozen'):
             # load and inject in modules list, this allows to have the source in a
             # directory named differently than '<package_name>'
-            sys.modules[package_name] = __import__(tail, globals(), locals(), [], -1)
+            sys.modules[package_name] = __import__(tail, globals(), locals())
 
 prepare_package('tabletop_weather_station_demo')
 
