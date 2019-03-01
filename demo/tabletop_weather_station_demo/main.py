@@ -31,11 +31,7 @@ else:
     gui = '--gui' in sys.argv[1:]
 
 if gui:
-    import sip
-    sip.setapi('QString', 2)
-    sip.setapi('QVariant', 2)
-
-    from PyQt4 import QtCore, QtGui
+    from PyQt5 import QtCore, QtWidgets, QtGui
 
 import os
 import signal
@@ -47,34 +43,24 @@ import time
 import threading
 import socket
 
-try:
-    import Queue as queue
-except:
-    import queue
+import queue
 
 def prepare_package(package_name):
     # from http://www.py2exe.org/index.cgi/WhereAmI
     if hasattr(sys, 'frozen'):
-        program_file_raw = sys.executable
+        program_path = os.path.dirname(os.path.realpath(sys.executable))
     else:
-        program_file_raw = __file__
-
-    if sys.hexversion < 0x03000000:
-        program_file = unicode(program_file_raw, sys.getfilesystemencoding())
-    else:
-        program_file = program_file_raw
-
-    program_path = os.path.dirname(os.path.realpath(program_file))
+        program_path = os.path.dirname(os.path.realpath(__file__))
 
     # add program_path so OpenGL is properly imported
     sys.path.insert(0, program_path)
 
     # allow the program to be directly started by calling 'main.py'
     # without '<package_name>' being in the path already
-    if not package_name in sys.modules:
+    if package_name not in sys.modules:
         head, tail = os.path.split(program_path)
 
-        if not head in sys.path:
+        if head not in sys.path:
             sys.path.insert(0, head)
 
         if not hasattr(sys, 'frozen'):
@@ -358,20 +344,20 @@ def main():
     if gui:
         from tabletop_weather_station_demo.load_pixmap import load_pixmap
 
-        app = QtGui.QApplication(sys.argv)
+        app = QtWidgets.QApplication(sys.argv)
 
-        main_widget = QtGui.QWidget()
+        main_widget = QtWidgets.QWidget()
         main_widget.setWindowIcon(QtGui.QIcon(load_pixmap('tabletop_weather_station_demo-icon.png')))
         main_widget.setWindowTitle('Tabletop Weather Station Demo ' + DEMO_VERSION)
         main_widget.setMinimumSize(800, 450)
 
-        button_layout = QtGui.QHBoxLayout()
+        button_layout = QtWidgets.QHBoxLayout()
 
-        main_layout = QtGui.QVBoxLayout()
+        main_layout = QtWidgets.QVBoxLayout()
 
-        log_edit = QtGui.QPlainTextEdit(main_widget)
+        log_edit = QtWidgets.QPlainTextEdit(main_widget)
         log_edit.setReadOnly(True)
-        log_edit.setLineWrapMode(QtGui.QPlainTextEdit.NoWrap)
+        log_edit.setLineWrapMode(QtWidgets.QPlainTextEdit.NoWrap)
         log_edit.setMaximumBlockCount(3000)
 
         log_handler = GUIHandler(log_edit)
@@ -383,11 +369,11 @@ def main():
             if other != log_handler:
                 log.getLogger().removeHandler(other)
 
-        hide_button = QtGui.QPushButton('Hide', main_widget)
-        hide_button.setVisible(QtGui.QSystemTrayIcon.isSystemTrayAvailable() and sys.platform != 'darwin') # FIXME: systray icon doesn't work properly on macOS, disable for now
+        hide_button = QtWidgets.QPushButton('Hide', main_widget)
+        hide_button.setVisible(QtWidgets.QSystemTrayIcon.isSystemTrayAvailable() and sys.platform != 'darwin') # FIXME: systray icon doesn't work properly on macOS, disable for now
         hide_button.clicked.connect(main_widget.hide)
 
-        exit_button = QtGui.QPushButton('Exit', main_widget)
+        exit_button = QtWidgets.QPushButton('Exit', main_widget)
         exit_button.clicked.connect(app.quit)
 
         button_layout.addWidget(hide_button)
@@ -400,15 +386,15 @@ def main():
         main_widget.show()
 
         def tray_icon_activated(reason):
-            if reason != QtGui.QSystemTrayIcon.Context:
+            if reason != QtWidgets.QSystemTrayIcon.Context:
                 main_widget.show()
                 tray_icon.hide()
 
-        tray_icon = QtGui.QSystemTrayIcon(QtGui.QIcon(load_pixmap('tabletop_weather_station_demo-icon.png')), None)
+        tray_icon = QtWidgets.QSystemTrayIcon(QtGui.QIcon(load_pixmap('tabletop_weather_station_demo-icon.png')), None)
         tray_icon.activated.connect(tray_icon_activated)
         tray_icon.setToolTip('Tabletop Weather Station Demo')
 
-        tray_menu = QtGui.QMenu(None)
+        tray_menu = QtWidgets.QMenu(None)
 
         tray_show_action = tray_menu.addAction('Show')
         tray_show_action.triggered.connect(main_widget.show)

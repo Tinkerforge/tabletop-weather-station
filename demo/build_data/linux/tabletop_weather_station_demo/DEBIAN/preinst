@@ -1,0 +1,11 @@
+#!/bin/sh
+set -e
+
+# If the user had installed an old version of tabletop-weather-station-demo (before the port to Python 3)
+# and ran tabletop-weather-station-demo with root permissions, pyc files are created in the installation
+# folder. Remove them and all empty folders before installing the new tabletop-weather-station-demo version.
+
+if [ -d "/usr/share/tabletop-weather-station-demo" ]; then
+    find /usr/share/tabletop-weather-station-demo -name "*.pyc" -print0 | xargs --null --no-run-if-empty rm
+    find /usr/lib/python3/dist-packages/ -type d -empty -print0 | xargs --null --no-run-if-empty rmdir
+fi

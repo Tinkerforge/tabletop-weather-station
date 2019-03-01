@@ -5,7 +5,7 @@ Maintainer: Matthias Bolte <matthias@tinkerforge.com>
 Architecture: all
 Priority: optional
 Installed-Size: <<INSTALLED_SIZE>>
-Depends: python, python-qt4
+Depends: python3, python3-pyqt5
 Description: Tabletop Weather Station Demo
  This demo provides a small program to demonstrate the features of the
  Tabletop Weather Station from Tinkerforge (see www.tinkerforge.com)
