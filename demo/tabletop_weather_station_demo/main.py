@@ -370,7 +370,8 @@ def main():
                 log.getLogger().removeHandler(other)
 
         hide_button = QtWidgets.QPushButton('Hide', main_widget)
-        hide_button.setVisible(QtWidgets.QSystemTrayIcon.isSystemTrayAvailable() and sys.platform != 'darwin') # FIXME: systray icon doesn't work properly on macOS, disable for now
+        # Don't show hide_button on macOS, as the program is also visible in the dock (when hidden), which is confusing.
+        hide_button.setVisible(QtWidgets.QSystemTrayIcon.isSystemTrayAvailable() and sys.platform != 'darwin')
         hide_button.clicked.connect(main_widget.hide)
 
         exit_button = QtWidgets.QPushButton('Exit', main_widget)
@@ -385,10 +386,17 @@ def main():
         main_widget.setLayout(main_layout)
         main_widget.show()
 
+        def toggle_main_widget():
+            if main_widget.isVisible():
+                main_widget.hide()
+                tray_show_action.setText("Show")
+            else:
+                main_widget.show()
+                tray_show_action.setText("Hide")
+
         def tray_icon_activated(reason):
             if reason != QtWidgets.QSystemTrayIcon.Context:
-                main_widget.show()
-                tray_icon.hide()
+                toggle_main_widget()
 
         tray_icon = QtWidgets.QSystemTrayIcon(QtGui.QIcon(load_pixmap('tabletop_weather_station_demo-icon.png')), None)
         tray_icon.activated.connect(tray_icon_activated)
@@ -397,15 +405,16 @@ def main():
         tray_menu = QtWidgets.QMenu(None)
 
         tray_show_action = tray_menu.addAction('Show')
-        tray_show_action.triggered.connect(main_widget.show)
-        tray_show_action.triggered.connect(tray_icon.hide)
+        tray_show_action.triggered.connect(toggle_main_widget)
 
         tray_exit_action = tray_menu.addAction('Exit')
         tray_exit_action.triggered.connect(app.quit)
 
         tray_icon.setContextMenu(tray_menu)
+        if QtWidgets.QSystemTrayIcon.isSystemTrayAvailable() and sys.platform != 'darwin':
+            tray_icon.show()
 
-        hide_button.clicked.connect(tray_icon.show)
+        hide_button.clicked.connect(toggle_main_widget)
 
     log.info('Tabletop Weather Station: Start')
 
