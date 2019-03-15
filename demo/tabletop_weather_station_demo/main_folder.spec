@@ -2,7 +2,7 @@
 
 import os
 import sys
-sys.path.append('..')
+sys.path.insert(0, '..') # Ensure to use the demo source, not an installed version
 from tabletop_weather_station_demo.pyinstaller_utils import *
 from tabletop_weather_station_demo.config import DEMO_VERSION
 
