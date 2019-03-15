@@ -53,25 +53,6 @@ def system(command):
         sys.exit(1)
 
 
-def check_output(*args, **kwargs):
-    if 'stdout' in kwargs:
-        raise ValueError('stdout argument not allowed, it will be overridden')
-
-    process = subprocess.Popen(stdout=subprocess.PIPE, *args, **kwargs)
-    output, error = process.communicate()
-    exit_code = process.poll()
-
-    if exit_code != 0:
-        command = kwargs.get('args')
-
-        if command == None:
-            command = args[0]
-
-        raise subprocess.CalledProcessError(exit_code, command, output=output)
-
-    return output
-
-
 def specialize_template(template_filename, destination_filename, replacements):
     template_file = open(template_filename, 'r')
     lines = []
