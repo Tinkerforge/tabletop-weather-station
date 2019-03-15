@@ -3,6 +3,11 @@
 # These icons are generated with the "icon_from_image.py"-script
 # The script and image data can be found in the ../data/ folder
 
+class Icon:
+    WIDTH  = 0
+    HEIGHT = 0
+    data   = None
+
 def rotate_left_90(icon):
     class IconRotated(Icon):
         data = []
@@ -15,11 +20,6 @@ def rotate_left_90(icon):
             IconRotated.data.append(icon.data[h*icon.WIDTH + w])
 
     return IconRotated
-
-class Icon:
-    WIDTH  = 0
-    HEIGHT = 0
-    data   = None
 
 class IconTabData(Icon):
     WIDTH  = 28
