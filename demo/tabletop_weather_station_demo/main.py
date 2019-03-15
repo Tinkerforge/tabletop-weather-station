@@ -24,6 +24,9 @@ Boston, MA 02111-1307, USA.
 """
 
 import sys
+if (sys.hexversion & 0xFF000000) != 0x03000000:
+    print('Python 3.x required')
+    sys.exit(1)
 
 if hasattr(sys, 'frozen'):
     gui = True
