@@ -10,4 +10,4 @@ Terminal=false
 Icon=tabletop_weather_station_demo-icon.png
 Type=Application
 Exec=tabletop_weather_station_demo --gui
-Categories=Electronics;
+Categories=Development;Electronics
