@@ -375,7 +375,6 @@ def main():
         hide_button = QtWidgets.QPushButton('Hide', main_widget)
         # Don't show hide_button on macOS, as the program is also visible in the dock (when hidden), which is confusing.
         hide_button.setVisible(QtWidgets.QSystemTrayIcon.isSystemTrayAvailable() and sys.platform != 'darwin')
-        hide_button.clicked.connect(main_widget.hide)
 
         exit_button = QtWidgets.QPushButton('Exit', main_widget)
         exit_button.clicked.connect(app.quit)
