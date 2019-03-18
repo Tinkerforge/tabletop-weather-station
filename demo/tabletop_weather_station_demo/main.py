@@ -407,7 +407,7 @@ def main():
 
         tray_menu = QtWidgets.QMenu(None)
 
-        tray_show_action = tray_menu.addAction('Show')
+        tray_show_action = tray_menu.addAction('Hide')
         tray_show_action.triggered.connect(toggle_main_widget)
 
         tray_exit_action = tray_menu.addAction('Exit')
