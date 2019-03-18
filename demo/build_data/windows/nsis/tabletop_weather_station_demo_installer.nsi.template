@@ -24,7 +24,7 @@ RequestExecutionLevel admin
 
   DetailPrint "Uninstall Tabletop Weather Station Demo..."
 
-  RMDir /R $INSTDIR
+  RMDir /R "$INSTDIR"
 
   ; Remove menu shortcuts
   SetShellVarContext all
@@ -49,7 +49,7 @@ UninstPage instfiles
 
 ;--------------------------------
 
-Section /o "-uninstall old demo" SEC_UNINSTALL_OLD
+Section /o "-Uninstall Tabletop Weather Station Demo" SEC_UNINSTALL_OLD
 
   !insertmacro macrouninstall
 
