@@ -1,5 +1,8 @@
 2019-01-09: 1.0.0 (276d52f)
 - Initial version
 
-2019-03-18: 1.1.0 (<unknown>)
-- Port to Python 3 and PyQt 5
+2019-03-18: 1.1.0 (047f94e)
+- Port to Python 3 and PyQt 5 (macOS 10.11 or Windows 7 required)
+
+2019-04-09: 1.1.1 (<unknown>)
+- Add minimum macOS and Windows version checks
