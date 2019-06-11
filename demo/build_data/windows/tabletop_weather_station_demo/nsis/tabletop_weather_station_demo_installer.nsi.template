@@ -1,4 +1,4 @@
-Name "Tabletop Weather Station Demo <<DOT_VERSION>>"
+Name "Tabletop Weather Station Demo <<VERSION>>"
 
 OutFile "tabletop_weather_station_demo_windows_<<UNDERSCORE_VERSION>>.exe"
 
@@ -16,7 +16,7 @@ RequestExecutionLevel admin
 
 ;--------------------------------
 
-!define DEMO_VERSION <<DOT_VERSION>>
+!define DEMO_VERSION <<VERSION>>
 
 ;--------------------------------
 

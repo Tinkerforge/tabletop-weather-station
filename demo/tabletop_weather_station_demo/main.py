@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
 """
 Tabletop Weather Station
 Copyright (C) 2018 Olaf Lüke <olaf@tinkerforge.com>
@@ -87,6 +86,48 @@ except ImportError:
 from tabletop_weather_station_demo.screens import screen_set_lcd, screen_tab_selected, screen_touch_gesture, screen_update, screen_slider_value, Screen, TIME_SECONDS
 from tabletop_weather_station_demo.value_db import ValueDB
 from tabletop_weather_station_demo.config import DEMO_VERSION
+
+def get_resources_path(relative_path, warn_on_missing_file=True):
+    try:
+        # PyInstaller stores data files in a tmp folder refered to as _MEIPASS
+        #pylint: disable=protected-access
+        base_path = sys._MEIPASS
+    except AttributeError:
+        base_path = os.path.dirname(os.path.realpath(__file__))
+
+    path = os.path.join(base_path, relative_path)
+
+    # If the path still doesn't exist, this function won't help you
+    if not os.path.exists(path):
+        if warn_on_missing_file:
+            print("Resource not found: " + relative_path)
+        return None
+
+    return path
+
+def load_commit_id(name):
+    try:
+        # Don't warn if the file is missing, as it is expected when run from source.
+        path = get_resources_path(name, warn_on_missing_file=False)
+
+        if path is not None:
+            with open(path, 'r') as f:
+                return f.read().strip()
+    except FileNotFoundError:
+        pass
+
+    return None
+
+INTERNAL = load_commit_id('internal')
+
+SNAPSHOT = load_commit_id('snapshot')
+
+DEMO_FULL_VERSION = DEMO_VERSION
+
+if INTERNAL != None:
+    DEMO_FULL_VERSION += '+internal~{}'.format(INTERNAL)
+elif SNAPSHOT != None:
+    DEMO_FULL_VERSION += '+snapshot~{}'.format(SNAPSHOT)
 
 if gui:
     class GUIHandler(QtCore.QObject, log.Handler):
@@ -351,7 +392,7 @@ def main():
 
         main_widget = QtWidgets.QWidget()
         main_widget.setWindowIcon(QtGui.QIcon(load_pixmap('tabletop_weather_station_demo-icon.png')))
-        main_widget.setWindowTitle('Tabletop Weather Station Demo ' + DEMO_VERSION)
+        main_widget.setWindowTitle('Tabletop Weather Station Demo ' + DEMO_FULL_VERSION)
         main_widget.setMinimumSize(800, 450)
 
         button_layout = QtWidgets.QHBoxLayout()

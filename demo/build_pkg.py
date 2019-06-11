@@ -38,34 +38,54 @@ if (sys.hexversion & 0xFF000000) != 0x03000000:
 import os
 import shutil
 import subprocess
-from tabletop_weather_station_demo.config import DEMO_VERSION
 
 from build_pkg_utils import *
-
+from tabletop_weather_station_demo.config import DEMO_VERSION
 
 UNDERSCORE_NAME = 'tabletop_weather_station_demo'
 CAMEL_CASE_NAME = 'Tabletop Weather Station Demo'
 
+def write_commit_id(utils):
+    if utils.internal:
+        kind = 'internal'
+        commit_id = get_commit_id()
 
+        with open(os.path.join(utils.unpacked_source_path, 'internal'), 'w') as f:
+            f.write(commit_id)
+    else:
+        if utils.snapshot:
+            kind = 'snapshot'
+            commit_id = get_commit_id()
+
+            with open(os.path.join(utils.unpacked_source_path, 'snapshot'), 'w') as f:
+                f.write(commit_id)
+        else:
+            kind = None
+            commit_id = None
+
+    if kind != None:
+        utils.version = DEMO_VERSION + '+' + kind + '~' + commit_id
 
 def build_linux_pkg():
     print('building demo Debian package')
-    utils = BuildPkgUtils(UNDERSCORE_NAME, 'linux', DEMO_VERSION, '--internal' in sys.argv)
+
+    utils = BuildPkgUtils(UNDERSCORE_NAME, 'linux', DEMO_VERSION)
 
     utils.run_sdist()
     utils.copy_build_data()
     utils.unpack_sdist()
+
+    write_commit_id(utils)
 
     utils.build_debian_pkg()
 
 def build_pyinstaller_pkg():
     platform_dict = {'win32': 'windows', 'darwin': 'macos'}
 
-    utils = BuildPkgUtils(UNDERSCORE_NAME, platform_dict[sys.platform], DEMO_VERSION, '--internal' in sys.argv)
+    utils = BuildPkgUtils(UNDERSCORE_NAME, platform_dict[sys.platform], DEMO_VERSION)
+
     utils.exit_if_not_venv()
-
-    utils.build_pyinstaller_pkg()
-
+    utils.build_pyinstaller_pkg(pre_pyinstaller=lambda: write_commit_id(utils))
     utils.copy_build_artefact()
 
 def main():
@@ -87,6 +107,8 @@ def main():
 # run 'python build_pkg.py' to build the windows/linux/macos package
 if __name__ == '__main__':
     exit_code = main()
+
     if exit_code == 0:
         print('done')
+
     sys.exit(exit_code)
