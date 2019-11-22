@@ -17,7 +17,7 @@ Module WeatherStation
 			' 0xF8 == ° on LCD 128x64 charset
 			brickletLCD.WriteLine(3, 0, String.Format("Temp:     {0,6:##.00} {1}C", temperature/100.0, Chr(&HF8)))
 			brickletLCD.WriteLine(4, 0, String.Format("Humidity: {0,6:##.00} %RH",  humidity/100.0))
-			brickletLCD.WriteLine(5, 0, String.Format("Air Pres: {0,6:####.0} mbar", airPressure/100.0))
+			brickletLCD.WriteLine(5, 0, String.Format("Air Pres: {0,6:####.0} hPa", airPressure/100.0))
         End If
     End Sub
 

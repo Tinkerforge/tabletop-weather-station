@@ -54,7 +54,7 @@ class WeatherStation:
             # 0xF8 == ° on LCD 128x64 charset
             self.lcd.write_line(3, 0, 'Temp:     {0:6.2f} {1}C'.format(temperature/100.0, chr(0xF8)))
             self.lcd.write_line(4, 0, 'Humidity: {0:6.2f} %RH'.format(humidity/100.0))
-            self.lcd.write_line(5, 0, 'Air Pres: {0:6.1f} mbar'.format(air_pressure/100.0))
+            self.lcd.write_line(5, 0, 'Air Pres: {0:6.1f} hPa'.format(air_pressure/100.0))
 
     def cb_enumerate(self, uid, connected_uid, position, hardware_version,
                      firmware_version, device_identifier, enumeration_type):

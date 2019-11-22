@@ -31,7 +31,7 @@ void cb_all_values(int32_t iaq_index, uint8_t iaq_index_accuracy, int32_t temper
 		lcd_128x64_write_line(&tws->lcd, 3, 0, text);
 		sprintf(text, "Humidity: %6.2f %%RH", humidity/100.0);
 		lcd_128x64_write_line(&tws->lcd, 4, 0, text);
-		sprintf(text, "Air Pres: %6.2f mbar", air_pressure/100.0);
+		sprintf(text, "Air Pres: %6.2f hPa", air_pressure/100.0);
 		lcd_128x64_write_line(&tws->lcd, 5, 0, text);
 	}
 }

@@ -79,7 +79,7 @@ class IndoorScreen(Screen):
 
         self.lcd.draw_text(28, 16, self.lcd.FONT_6X8, self.lcd.COLOR_BLACK, '\xF8C')
         self.lcd.draw_text(26, 46, self.lcd.FONT_6X8, self.lcd.COLOR_BLACK, '%RH')
-        self.lcd.draw_text(78, 16, self.lcd.FONT_6X8, self.lcd.COLOR_BLACK, 'mbar')
+        self.lcd.draw_text(78, 16, self.lcd.FONT_6X8, self.lcd.COLOR_BLACK, 'hPa')
         self.lcd.draw_text(78, 46, self.lcd.FONT_6X8, self.lcd.COLOR_BLACK, 'IAQ')
 
         self.lcd.draw_line(0, 26, 127, 26, self.lcd.COLOR_BLACK)
@@ -123,7 +123,7 @@ class GraphScreen(Screen):
     text = "Graph"
     icon = icons.IconTabGraph
 
-    caption_air_quality  = ['\xF8C', '%RH', 'mbar', 'IAQ']
+    caption_air_quality  = ['\xF8C', '%RH', 'hPa', 'IAQ']
     formats_air_quality  = ['{0:.1f}', '{0:.1f}', '{0:.1f}', '{0:.0f}']
     divisors_air_quality = [100, 100, 100, 1]
     fields_air_quality   = ['temperature', 'humidity', 'air_pressure', 'iaq_index']

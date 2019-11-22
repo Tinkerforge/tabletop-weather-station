@@ -121,7 +121,7 @@ begin
     brickletLCD.WriteLine(3, 0, text);
     text := Format('Humidity: %6.2f %%RH', [humidity/100.0]);
     brickletLCD.WriteLine(4, 0, text);
-    text := Format('Air Pres: %6.2f mbar', [airPressure/100.0]);
+    text := Format('Air Pres: %6.2f hPa', [airPressure/100.0]);
     brickletLCD.WriteLine(5, 0, text);
   end;
 end;

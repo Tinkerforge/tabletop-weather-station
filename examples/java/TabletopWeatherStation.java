@@ -20,7 +20,7 @@ class WeatherListener implements IPConnection.EnumerateListener,
 				brickletLCD.writeLine(2, 0, String.format("IAQ:      %6d", iaqIndex));
 				brickletLCD.writeLine(3, 0, String.format("Temp:     %6.2f %cC", temperature/100.0, 0xF8));
 				brickletLCD.writeLine(4, 0, String.format("Humidity: %6.2f %%RH", humidity/100.0));
-				brickletLCD.writeLine(5, 0, String.format("Air Pres: %6.2f mbar", airPressure/100.0));
+				brickletLCD.writeLine(5, 0, String.format("Air Pres: %6.2f hPa", airPressure/100.0));
 			} catch(com.tinkerforge.TinkerforgeException e) {
 				System.out.println("Error during writeLine: " + e);
 			}

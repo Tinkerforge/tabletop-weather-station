@@ -161,7 +161,7 @@ class BrickletAirQuality(Device):
         * IAQ Index Accuracy: 0 = unreliable to 3 = high
         * Temperature: in steps of 0.01 °C
         * Humidity: in steps of 0.01 %RH
-        * Air Pressure: in steps of 0.01 mbar
+        * Air Pressure: in steps of 0.01 hPa
         """
         return GetAllValues(*self.ipcon.send_request(self, BrickletAirQuality.FUNCTION_GET_ALL_VALUES, (), '', 'i B i i i'))
 
@@ -379,7 +379,7 @@ class BrickletAirQuality(Device):
 
     def get_air_pressure(self):
         """
-        Returns air pressure in steps of 0.01 mbar.
+        Returns air pressure in steps of 0.01 hPa.
 
 
         If you want to get the value periodically, it is recommended to use the

@@ -52,7 +52,7 @@ class WeatherStation
 			// 0xF8 == ° on LCD 128x64 charset
 			$this->brickletLCD->writeLine(3, 0, sprintf("Temp:     %6.2f %cC", $temperature/100.0, 0xF8));
 			$this->brickletLCD->writeLine(4, 0, sprintf("Humidity: %6.2f %%RH", $humidity/100.0));
-			$this->brickletLCD->writeLine(5, 0, sprintf("Air Pres: %6.2f mbar", $air_pressure/100.0));
+			$this->brickletLCD->writeLine(5, 0, sprintf("Air Pres: %6.2f hPa", $air_pressure/100.0));
 		}
 	}
 

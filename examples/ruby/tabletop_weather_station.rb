@@ -53,7 +53,7 @@ ipcon.register_callback(IPConnection::CALLBACK_ENUMERATE) do |uid, connected_uid
             # 0xF8 == ° on LCD 128x64 charset
             lcd.write_line 3, 0, 'Temp:     %6.2f %sC' % [(temperature/100.0), (0xF8.chr)]
             lcd.write_line 4, 0, 'Humidity: %6.2f %%RH' % (humidity/100.0)
-            lcd.write_line 5, 0, 'Air Pres: %6.2f mbar' % (air_pressure/100.0)
+            lcd.write_line 5, 0, 'Air Pres: %6.2f hPa' % (air_pressure/100.0)
           end
         end
         puts 'Air Quality initialized'
