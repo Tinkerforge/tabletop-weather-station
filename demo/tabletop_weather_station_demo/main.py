@@ -354,8 +354,8 @@ class TabletopWeatherStation(object):
             self.vdb.add_data_air_quality(iaq_index, iaq_index_accuracy, temperature, humidity, air_pressure)
             self.last_air_quality_time = now
 
-def loop(run_ref, stop_queue):
-    vdb = ValueDB(gui)
+def loop(run_ref, stop_queue, packaged):
+    vdb = ValueDB(gui, packaged)
     tws = TabletopWeatherStation(vdb, run_ref, stop_queue)
     Screen.tws = tws
     Screen.vdb = vdb
@@ -384,7 +384,7 @@ def loop(run_ref, stop_queue):
         except Error:
             pass
 
-def main():
+def main(packaged):
     if gui:
         from tabletop_weather_station_demo.load_pixmap import load_pixmap
 
@@ -465,7 +465,7 @@ def main():
     stop_queue = queue.Queue()
 
     if gui:
-        thread = threading.Thread(target=loop, args=(run_ref, stop_queue))
+        thread = threading.Thread(target=loop, args=(run_ref, stop_queue, packaged))
         thread.daemon = True
         thread.start()
 
@@ -490,7 +490,7 @@ def main():
         signal.signal(signal.SIGINT, quit_)
         signal.signal(signal.SIGTERM, quit_)
 
-        loop(run_ref, stop_queue)
+        loop(run_ref, stop_queue, packaged)
 
         ec = 0
 
@@ -499,4 +499,4 @@ def main():
     sys.exit(ec)
 
 if __name__ == '__main__':
-    main()
+    main(packaged=False)

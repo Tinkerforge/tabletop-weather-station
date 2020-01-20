@@ -27,6 +27,7 @@ import os
 import threading
 import time
 import logging as log
+import sys
 
 try:
     import Queue as queue
@@ -41,10 +42,23 @@ class ValueDB:
         self.func_queue.put(None)
         self.thread.join(2)
 
+    def is_packaged(self):
+        if self.packaged:
+            return True
+        try:
+            # PyInstaller stores data files in a tmp folder refered to as _MEIPASS
+            #pylint: disable=protected-access
+            base_path = sys._MEIPASS
+            return True
+        except:
+            pass
+
+        return False
+
     def loop(self):
         db_name = '.tabletop_weather_station_demo.db'
 
-        if self.gui:
+        if self.gui or self.is_packaged():
             db_path = os.path.join(os.path.expanduser('~'), db_name)
         else:
             db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), db_name)
@@ -548,8 +562,9 @@ class ValueDB:
 
         self.db.commit()
 
-    def __init__(self, gui):
+    def __init__(self, gui, packaged):
         self.gui = gui
+        self.packaged = packaged
         self.run = True
         self.func_queue = queue.Queue()
         self.func_queue_ret = queue.Queue()
