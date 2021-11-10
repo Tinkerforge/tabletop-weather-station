@@ -7,5 +7,5 @@
 2019-04-09: 1.1.1 (6bd6677)
 - Add minimum macOS and Windows version checks
 
-2021-11-10: 1.1.2 (<unknown>)
+2021-11-10: 1.1.2 (a66830e)
 - Use correct database path if started from commandline
