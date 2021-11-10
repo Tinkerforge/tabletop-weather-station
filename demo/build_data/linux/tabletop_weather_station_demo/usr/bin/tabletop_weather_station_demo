@@ -1,2 +1,2 @@
 #!/bin/sh
-python3 /usr/share/tabletop_weather_station_demo/main.py "$@"
+python3 /usr/share/tabletop_weather_station_demo/main.py --packaged "$@"

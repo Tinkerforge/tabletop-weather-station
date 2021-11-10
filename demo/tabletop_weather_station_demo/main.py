@@ -499,4 +499,4 @@ def main(packaged):
     sys.exit(ec)
 
 if __name__ == '__main__':
-    main(packaged=False)
+    main(packaged='--packaged' in sys.argv[1:])
